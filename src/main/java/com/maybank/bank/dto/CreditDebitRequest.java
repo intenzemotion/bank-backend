@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountInfo {
+public class CreditDebitRequest {
 
-    private String accountName;
     private String accountNumber;
-    private BigDecimal accountBalance;
+    private String requestType; // credit / debit
+    private BigDecimal amount;
 }
