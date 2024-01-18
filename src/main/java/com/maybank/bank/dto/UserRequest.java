@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class UserRequest {
 
     private String firstName;
     private String lastName;
@@ -17,6 +17,5 @@ public class UserDTO {
     private String email;
     private String address;
     private String phoneNumber;
-    private String status;
 
 }
