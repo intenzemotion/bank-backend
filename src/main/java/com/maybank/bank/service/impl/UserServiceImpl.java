@@ -2,9 +2,11 @@ package com.maybank.bank.service.impl;
 
 import com.maybank.bank.dto.AccountInfo;
 import com.maybank.bank.dto.BankResponse;
+import com.maybank.bank.dto.EmailDetails;
 import com.maybank.bank.dto.UserRequest;
 import com.maybank.bank.entity.User;
 import com.maybank.bank.repository.UserRepo;
+import com.maybank.bank.service.EmailService;
 import com.maybank.bank.service.UserService;
 import com.maybank.bank.util.AccountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     UserRepo userRepo;
+
+    @Autowired
+    EmailService emailService;
 
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
@@ -42,6 +47,19 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         User savedUser = userRepo.save(newUser);
+
+        // send email alert
+        EmailDetails emailDetails = EmailDetails.builder()
+                .recipient(savedUser.getEmail())
+                .subject("Mock App Account Creation")
+                .messageBody(
+                        "Congratulations! Your account has been successfully created." +
+                                "\nYour Account Details:" +
+                                "\nAccount Name: " + savedUser.getFirstName() + " " + savedUser.getLastName() +
+                                "\nAccount Number: " + savedUser.getAccountNumber())
+                .build();
+
+        emailService.sendEmailAlert(emailDetails);
 
         return BankResponse.builder()
                 .responseCode(AccountUtil.ACCOUNT_CREATION_SUCCESS)
