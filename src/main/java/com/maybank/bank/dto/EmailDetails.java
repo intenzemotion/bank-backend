@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRequest {
+public class EmailDetails {
 
-    private String firstName;
-    private String lastName;
-    private String gender;
-    private String email;
-    private String address;
-    private String phoneNumber;
+    private String recipient;
+    private String subject;
+    private String messageBody;
+    private String attachment;
 }
