@@ -1,6 +1,5 @@
 package com.maybank.bank.dto;
 
-import com.maybank.bank.enumeration.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,10 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreditDebitRequest {
+public class TransactionResponse {
 
     private String accountNumber;
-
-    private TransactionType requestType;
-
+    private String transactionType;
     private BigDecimal amount;
+    private String status; // pending, failure, success
 }

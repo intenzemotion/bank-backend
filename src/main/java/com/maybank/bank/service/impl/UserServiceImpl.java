@@ -2,8 +2,10 @@ package com.maybank.bank.service.impl;
 
 import com.maybank.bank.dto.*;
 import com.maybank.bank.entity.User;
+import com.maybank.bank.enumeration.TransactionType;
 import com.maybank.bank.repository.UserRepo;
 import com.maybank.bank.service.EmailService;
+import com.maybank.bank.service.TransactionService;
 import com.maybank.bank.service.UserService;
 import com.maybank.bank.util.AccountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,13 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final EmailService emailService;
+    private final TransactionService transactionService;
 
     @Autowired
-    public UserServiceImpl(UserRepo userRepo, EmailService emailService) {
+    public UserServiceImpl(UserRepo userRepo, EmailService emailService, TransactionService transactionService) {
         this.userRepo = userRepo;
         this.emailService = emailService;
+        this.transactionService = transactionService;
     }
 
     @Override
@@ -45,7 +49,6 @@ public class UserServiceImpl implements UserService {
                 .accountBalance(BigDecimal.ZERO)
                 .status("ACTIVE")
                 .build();
-
         User savedUser = userRepo.save(newUser);
 
         // send email alert
@@ -123,6 +126,15 @@ public class UserServiceImpl implements UserService {
         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(creditRequest.getAmount()));
         userRepo.save(userToCredit);
 
+        // save transaction
+        TransactionResponse transactionResponse = TransactionResponse.builder()
+                .accountNumber(userToCredit.getAccountNumber())
+                .transactionType(String.valueOf(TransactionType.CREDIT))
+                .amount(creditRequest.getAmount())
+                .status("SUCCESS")
+                .build();
+        transactionService.saveTransaction(transactionResponse);
+
         return BankResponse.builder()
                 .responseCode(AccountUtil.ACCOUNT_CREDITED_SUCCESS_CODE)
                 .responseMessage(AccountUtil.ACCOUNT_CREDITED_SUCCESS_MESSAGE)
@@ -157,6 +169,16 @@ public class UserServiceImpl implements UserService {
         } else {
             userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(debitRequest.getAmount()));
             userRepo.save(userToDebit);
+
+            // save transaction
+            TransactionResponse transactionResponse = TransactionResponse.builder()
+                    .accountNumber(userToDebit.getAccountNumber())
+                    .transactionType(String.valueOf(TransactionType.DEBIT))
+                    .amount(debitRequest.getAmount())
+                    .status("SUCCESS")
+                    .build();
+            transactionService.saveTransaction(transactionResponse);
+
             return BankResponse.builder()
                     .responseCode(AccountUtil.ACCOUNT_DEBITED_SUCCESS)
                     .responseMessage(AccountUtil.ACCOUNT_DEBITED_SUCCESS_MESSAGE)
@@ -205,6 +227,15 @@ public class UserServiceImpl implements UserService {
                 .build();
         emailService.sendEmailAlert(debitAlert);
 
+        // save debit transaction
+        TransactionResponse transactionDebitResponse = TransactionResponse.builder()
+                .accountNumber(sourceAccountUser.getAccountNumber())
+                .transactionType(String.valueOf(TransactionType.DEBIT))
+                .amount(transferRequest.getAmount())
+                .status("SUCCESS")
+                .build();
+        transactionService.saveTransaction(transactionDebitResponse);
+
         // credit
         User destinationAccountUser = userRepo.findByAccountNumber(transferRequest.getDestinationAccountNumber());
         destinationAccountUser.setAccountBalance(destinationAccountUser.getAccountBalance().add(transferRequest.getAmount()));
@@ -219,6 +250,15 @@ public class UserServiceImpl implements UserService {
                                 "\nYour current balance is " + destinationAccountUser.getAccountBalance())
                 .build();
         emailService.sendEmailAlert(creditAlert);
+
+        // save credit transaction
+        TransactionResponse transactionCreditResponse = TransactionResponse.builder()
+                .accountNumber(destinationAccountUser.getAccountNumber())
+                .transactionType(String.valueOf(TransactionType.CREDIT))
+                .amount(transferRequest.getAmount())
+                .status("SUCCESS")
+                .build();
+        transactionService.saveTransaction(transactionCreditResponse);
 
         return BankResponse.builder()
                 .responseCode(AccountUtil.TRANSFER_SUCCESS_CODE)
