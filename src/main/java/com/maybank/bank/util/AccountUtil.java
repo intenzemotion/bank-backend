@@ -44,4 +44,13 @@ public class AccountUtil {
 
     public static final String ACCOUNT_DEBITED_SUCCESS = "007";
     public static final String ACCOUNT_DEBITED_SUCCESS_MESSAGE = "User account debited successfully!";
+
+    public static final String SOURCE_ACCOUNT_NOT_EXIST_CODE = "008";
+    public static final String SOURCE_ACCOUNT_NOT_EXIST_MESSAGE = "User with the account number does not exist.";
+
+    public static final String DESTINATION_ACCOUNT_NOT_EXIST_CODE = "009";
+    public static final String DESTINATION_ACCOUNT_NOT_EXIST_MESSAGE = "User with the account number does not exist.";
+
+    public static final String TRANSFER_SUCCESS_CODE = "010";
+    public static final String TRANSFER_SUCCESS_MESSAGE = "Transfer successful.";
 }

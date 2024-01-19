@@ -41,4 +41,8 @@ public class UserController {
     public BankResponse debitAccount(@RequestBody CreditDebitRequest debitRequest) {
         return userService.debitAccount(debitRequest);
     }
+    @PostMapping("/transfer")
+    public BankResponse transfer(@RequestBody TransferRequest transferRequest) {
+        return userService.transfer(transferRequest);
+    }
 }

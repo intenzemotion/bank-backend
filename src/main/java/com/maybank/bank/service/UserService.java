@@ -1,9 +1,6 @@
 package com.maybank.bank.service;
 
-import com.maybank.bank.dto.BankResponse;
-import com.maybank.bank.dto.CreditDebitRequest;
-import com.maybank.bank.dto.EnquiryRequest;
-import com.maybank.bank.dto.UserRequest;
+import com.maybank.bank.dto.*;
 
 public interface UserService {
 
@@ -16,4 +13,6 @@ public interface UserService {
     BankResponse creditAccount(CreditDebitRequest creditRequest);
 
     BankResponse debitAccount(CreditDebitRequest debitRequest);
+
+    BankResponse transfer(TransferRequest transferRequest);
 }
