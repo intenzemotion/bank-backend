@@ -6,7 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Builder
 @Getter
@@ -27,8 +27,8 @@ public class Transaction {
     private String status; // pending, failure, success
 
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @UpdateTimestamp
-    private LocalDateTime modifiedAt;
+    private LocalDate modifiedAt;
 }
