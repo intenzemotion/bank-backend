@@ -15,8 +15,6 @@ import java.math.BigDecimal;
 public class CreditDebitRequest {
 
     private String accountNumber;
-
     private TransactionType requestType;
-
     private BigDecimal amount;
 }
