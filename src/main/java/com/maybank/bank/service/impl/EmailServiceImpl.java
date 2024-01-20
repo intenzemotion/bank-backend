@@ -24,11 +24,11 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String senderEmail;
 
-    private final JavaMailSender sender;
+    private final JavaMailSender javaMailSender;
 
     @Autowired
-    public EmailServiceImpl(JavaMailSender sender) {
-        this.sender = sender;
+    public EmailServiceImpl(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class EmailServiceImpl implements EmailService {
             message.setSubject(emailDetails.getSubject());
             message.setText(emailDetails.getMessageBody());
 
-            sender.send(message);
+            javaMailSender.send(message);
         } catch (MailException e) {
             throw new RuntimeException(e);
         }
@@ -48,7 +48,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmailWithAttachment(EmailDetails emailDetails) {
-        MimeMessage mimeMessage = sender.createMimeMessage();
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
         try {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -59,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
 
             FileSystemResource file = new FileSystemResource(new File(emailDetails.getAttachment()));
             mimeMessageHelper.addAttachment(Objects.requireNonNull(file.getFilename()), file);
-            sender.send(mimeMessage);
+            javaMailSender.send(mimeMessage);
 
             log.info(file.getFilename() + " has been sent to user with email " + emailDetails.getRecipient());
         } catch (MessagingException e) {

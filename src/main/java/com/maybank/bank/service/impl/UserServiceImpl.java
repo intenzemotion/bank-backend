@@ -1,7 +1,9 @@
 package com.maybank.bank.service.impl;
 
+import com.maybank.bank.config.JwtTokenProvider;
 import com.maybank.bank.dto.*;
 import com.maybank.bank.entity.User;
+import com.maybank.bank.enumeration.Role;
 import com.maybank.bank.enumeration.TransactionType;
 import com.maybank.bank.repository.UserRepo;
 import com.maybank.bank.service.EmailService;
@@ -9,6 +11,9 @@ import com.maybank.bank.service.TransactionService;
 import com.maybank.bank.service.UserService;
 import com.maybank.bank.util.AccountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +26,17 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final TransactionService transactionService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserServiceImpl(UserRepo userRepo, EmailService emailService, TransactionService transactionService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepo userRepo, EmailService emailService, TransactionService transactionService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userRepo = userRepo;
         this.emailService = emailService;
         this.transactionService = transactionService;
         this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -37,7 +46,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.ACCOUNT_EXISTS_CODE)
                     .responseMessage(AccountUtil.ACCOUNT_EXISTS_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -52,6 +60,7 @@ public class UserServiceImpl implements UserService {
                 .accountNumber(AccountUtil.generateAccountNumber())
                 .accountBalance(BigDecimal.ZERO)
                 .status("ACTIVE")
+                .role(Role.USER)
                 .build();
         User savedUser = userRepo.save(newUser);
 
@@ -79,6 +88,26 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    public BankResponse login(LoginDetails loginDetails) {
+        Authentication authentication;
+        authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDetails.getEmail(), loginDetails.getPassword())
+        );
+
+        EmailDetails loginAlert = EmailDetails.builder()
+                .subject("You're logged in!")
+                .recipient(loginDetails.getEmail())
+                .messageBody("You logged into your account. If you did not initiate this request, please contact your bank.")
+                .build();
+        emailService.sendEmailAlert(loginAlert);
+
+        return BankResponse.builder()
+                .responseCode(AccountUtil.LOGIN_SUCCESS_CODE)
+                .responseMessage(AccountUtil.LOGIN_SUCCESS_MESSAGE)
+                .token(jwtTokenProvider.generateToken(authentication))
+                .build();
+    }
+
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest enquiryRequest) {
         boolean isAccountExist = userRepo.existsByAccountNumber(enquiryRequest.getAccountNumber());
@@ -86,7 +115,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtil.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -122,7 +150,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtil.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -159,7 +186,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtil.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -168,7 +194,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.INSUFFICIENT_BALANCE_CODE)
                     .responseMessage(AccountUtil.INSUFFICIENT_BALANCE_MESSAGE)
-                    .accountInfo(null)
                     .build();
         } else {
             userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(debitRequest.getAmount()));
@@ -205,7 +230,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.DESTINATION_ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtil.DESTINATION_ACCOUNT_NOT_EXIST_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -214,7 +238,6 @@ public class UserServiceImpl implements UserService {
             return BankResponse.builder()
                     .responseCode(AccountUtil.INSUFFICIENT_BALANCE_CODE)
                     .responseMessage(AccountUtil.INSUFFICIENT_BALANCE_MESSAGE)
-                    .accountInfo(null)
                     .build();
         }
 
@@ -267,7 +290,6 @@ public class UserServiceImpl implements UserService {
         return BankResponse.builder()
                 .responseCode(AccountUtil.TRANSFER_SUCCESS_CODE)
                 .responseMessage(AccountUtil.TRANSFER_SUCCESS_MESSAGE)
-                .accountInfo(null)
                 .build();
     }
 }

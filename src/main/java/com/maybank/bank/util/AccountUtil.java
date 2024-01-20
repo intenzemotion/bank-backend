@@ -53,4 +53,7 @@ public class AccountUtil {
 
     public static final String TRANSFER_SUCCESS_CODE = "010";
     public static final String TRANSFER_SUCCESS_MESSAGE = "Transfer successful.";
+
+    public static final String LOGIN_SUCCESS_CODE = "011";
+    public static final String LOGIN_SUCCESS_MESSAGE = "Login success.";
 }

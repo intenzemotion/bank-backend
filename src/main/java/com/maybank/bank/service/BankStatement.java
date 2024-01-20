@@ -164,5 +164,4 @@ public class BankStatement {
             log.error("DocumentException: ", e);
         }
     }
-
 }
