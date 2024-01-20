@@ -15,6 +15,7 @@ public class UserRequest {
     private String lastName;
     private String gender;
     private String email;
+    private String password; // will be encrypted when transferring over network
     private String address;
     private String phoneNumber;
 }

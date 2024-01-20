@@ -26,6 +26,7 @@ public class User {
     private String lastName;
     private String gender;
     private String email;
+    private String password; // will be encrypted
     private String address;
     private String phoneNumber;
     private String accountNumber; // generated on creation

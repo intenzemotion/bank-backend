@@ -9,6 +9,7 @@ import com.maybank.bank.service.TransactionService;
 import com.maybank.bank.service.UserService;
 import com.maybank.bank.util.AccountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,12 +20,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final EmailService emailService;
     private final TransactionService transactionService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepo userRepo, EmailService emailService, TransactionService transactionService) {
+    public UserServiceImpl(UserRepo userRepo, EmailService emailService, TransactionService transactionService, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
         this.emailService = emailService;
         this.transactionService = transactionService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(userRequest.getLastName())
                 .gender(userRequest.getGender())
                 .email(userRequest.getEmail())
+                .password(passwordEncoder.encode(userRequest.getPassword())) // encode immediately
                 .address(userRequest.getAddress())
                 .phoneNumber(userRequest.getPhoneNumber())
                 .accountNumber(AccountUtil.generateAccountNumber())
