@@ -2,6 +2,9 @@ package com.maybank.bank.controller;
 
 import com.maybank.bank.entity.Transaction;
 import com.maybank.bank.service.BankStatement;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bankStatement")
+@Tag(name = "Transaction API")
 public class TransactionController {
 
     private final BankStatement bankStatement;
